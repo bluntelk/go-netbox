@@ -82,7 +82,7 @@ func HSeed205(t *testing.T, client *netbox.APIClient) *Seed205 {
 		Description: netbox.PtrString("This is a test"),
 	}
 
-	tag, res, err := client.ExtrasAPI.ExtrasTagsCreate(context.Background()).TagRequest(*tagRequest).Execute()
+	tag, res, err := client.ExtrasAPI.ExtrasTagsCreate(context.Background()).ExtrasTagsCreateRequest(netbox.ExtrasTagsCreateRequest{TagRequest: tagRequest}).Execute()
 	if err != nil {
 		fatalHttp(t, "failed to create tag", err, res)
 	}
@@ -106,7 +106,9 @@ func Test205(t *testing.T) {
 		Description: netbox.PtrString("This is a test"),
 	}
 
-	tag, res, err := client.ExtrasAPI.ExtrasTagsCreate(context.Background()).TagRequest(*tagRequest).Execute()
+	tag, res, err := client.ExtrasAPI.ExtrasTagsCreate(context.Background()).ExtrasTagsCreateRequest(netbox.ExtrasTagsCreateRequest{
+		TagRequest: tagRequest,
+	}).Execute()
 	if err != nil {
 		fatalHttp(t, "failed to create tag", err, res)
 	}

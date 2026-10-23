@@ -25,7 +25,7 @@ type Defaults struct {
 	DeviceRole   netbox.DeviceRole
 	Manufacturer netbox.Manufacturer
 	DeviceType   netbox.DeviceType
-	Device       netbox.DeviceWithConfigContext
+	Device       netbox.Device
 }
 
 func (d *Defaults) Cleanup(t *testing.T, client *netbox.APIClient) {
@@ -80,7 +80,7 @@ func HGetDefaults(t *testing.T, client *netbox.APIClient) *Defaults {
 		Slug: siteName + randString(4),
 	}
 
-	newSite, res, err := client.DcimAPI.DcimSitesCreate(context.Background()).WritableSiteRequest(site).Execute()
+	newSite, res, err := client.DcimAPI.DcimSitesCreate(context.Background()).DcimSitesCreateRequest(netbox.DcimSitesCreateRequest{WritableSiteRequest: &site}).Execute()
 	if err != nil {
 		fatalHttp(t, "Failed to create site", err, res)
 	}
@@ -90,7 +90,10 @@ func HGetDefaults(t *testing.T, client *netbox.APIClient) *Defaults {
 		Slug: deviceRoleName + randString(4),
 	}
 
-	newDeviceRole, res, err := client.DcimAPI.DcimDeviceRolesCreate(context.Background()).WritableDeviceRoleRequest(deviceRole).Execute()
+	newDeviceRole, res, err := client.DcimAPI.
+		DcimDeviceRolesCreate(context.Background()).
+		DcimDeviceRolesCreateRequest(netbox.DcimDeviceRolesCreateRequest{WritableDeviceRoleRequest: &deviceRole}).
+		Execute()
 	if err != nil {
 		fatalHttp(t, "Failed to create device role", err, res)
 	}
@@ -100,7 +103,10 @@ func HGetDefaults(t *testing.T, client *netbox.APIClient) *Defaults {
 		Slug: manufacturerName + randString(4),
 	}
 
-	newManufacturer, res, err := client.DcimAPI.DcimManufacturersCreate(context.Background()).ManufacturerRequest(manufacturer).Execute()
+	newManufacturer, res, err := client.DcimAPI.
+		DcimManufacturersCreate(context.Background()).
+		DcimManufacturersCreateRequest(netbox.DcimManufacturersCreateRequest{ManufacturerRequest: &manufacturer}).
+		Execute()
 	if err != nil {
 		fatalHttp(t, "Failed to create manufacturer", err, res)
 	}
@@ -111,21 +117,30 @@ func HGetDefaults(t *testing.T, client *netbox.APIClient) *Defaults {
 		Manufacturer: netbox.BriefDeviceTypeRequestManufacturer{Int32: &newManufacturer.Id},
 	}
 
-	newDeviceType, res, err := client.DcimAPI.DcimDeviceTypesCreate(context.Background()).WritableDeviceTypeRequest(deviceType).Execute()
+	newDeviceType, res, err := client.DcimAPI.
+		DcimDeviceTypesCreate(context.Background()).
+		DcimDeviceTypesCreateRequest(netbox.DcimDeviceTypesCreateRequest{
+			WritableDeviceTypeRequest: &deviceType,
+		}).
+		Execute()
 	if err != nil {
 		fatalHttp(t, "Failed to create device type", err, res)
 	}
 
 	name := deviceName + randString(4)
 
-	device := netbox.WritableDeviceWithConfigContextRequest{
+	device := netbox.WritableDeviceRequest{
 		Name:       *netbox.NewNullableString(&name),
-		Role:       netbox.DeviceWithConfigContextRequestRole{Int32: &newDeviceRole.Id},
-		Site:       netbox.DeviceWithConfigContextRequestSite{Int32: &newSite.Id},
-		DeviceType: netbox.DeviceBayTemplateRequestDeviceType{Int32: &newDeviceType.Id},
+		Role:       netbox.BulkDeviceRequestRole{Int32: &newDeviceRole.Id},
+		Site:       netbox.BulkCoolingSourceRequestSite(netbox.DeviceWithConfigContextRequestSite{Int32: &newSite.Id}),
+		DeviceType: netbox.BulkDeviceBayTemplateRequestDeviceType(netbox.DeviceBayTemplateRequestDeviceType{Int32: &newDeviceType.Id}),
 	}
 
-	newDevice, res, err := client.DcimAPI.DcimDevicesCreate(context.Background()).WritableDeviceWithConfigContextRequest(device).Execute()
+	newDevice, res, err := client.DcimAPI.
+		DcimDevicesCreate(context.Background()).
+		DcimDevicesCreateRequest(netbox.DcimDevicesCreateRequest{
+			WritableDeviceRequest: &device,
+		}).Execute()
 	if err != nil {
 		fatalHttp(t, "Failed to create device", err, res)
 	}

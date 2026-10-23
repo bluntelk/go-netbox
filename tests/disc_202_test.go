@@ -72,7 +72,7 @@ func HSeed202Disc(t *testing.T, client *netbox.APIClient) *Seed202Disc {
 		Prefix: "192.168.1.0/24",
 	}
 
-	prefix, res, err := client.IpamAPI.IpamPrefixesCreate(context.Background()).WritablePrefixRequest(prefixReq).Execute()
+	prefix, res, err := client.IpamAPI.IpamPrefixesCreate(context.Background()).IpamPrefixesCreateRequest(netbox.IpamPrefixesCreateRequest{WritablePrefixRequest: &prefixReq}).Execute()
 	if err != nil {
 		fatalHttp(t, "failed to create prefix", err, res)
 	}
@@ -81,7 +81,7 @@ func HSeed202Disc(t *testing.T, client *netbox.APIClient) *Seed202Disc {
 		Address: "192.168.1.1/24",
 	}
 
-	ip, res, err := client.IpamAPI.IpamIpAddressesCreate(context.Background()).WritableIPAddressRequest(ipReq).Execute()
+	ip, res, err := client.IpamAPI.IpamIpAddressesCreate(context.Background()).IpamIpAddressesCreateRequest(netbox.IpamIpAddressesCreateRequest{WritableIPAddressRequest: &ipReq}).Execute()
 	if err != nil {
 		fatalHttp(t, "failed to create ip address", err, res)
 	}
@@ -105,11 +105,17 @@ func Test202Disc(t *testing.T) {
 		fatalHttp(t, "failed to list prefixes", err, res)
 	}
 
-	ipAddressRequest := netbox.IPAddressRequest{
-		Address: "192.168.1.1/24",
-	}
+	//ipAddressRequest := netbox.IPAddressRequest{
+	//	Address: "192.168.1.1/24",
+	//}
+	prefixLen := int32(24)
 
-	_, res, err = client.IpamAPI.IpamPrefixesAvailableIpsCreate(context.Background(), seed.Prefix.Id).IPAddressRequest([]netbox.IPAddressRequest{ipAddressRequest}).Execute()
+	_, res, err = client.IpamAPI.
+		IpamPrefixesAvailableIpsCreate(context.Background(), seed.Prefix.Id).
+		AvailableIPRequestRequest([]netbox.AvailableIPRequestRequest{{
+			PrefixLength: &prefixLen,
+		}}).
+		Execute()
 	if err != nil {
 		fatalHttp(t, "failed to create ip address", err, res)
 	}
