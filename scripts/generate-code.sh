@@ -8,7 +8,7 @@ for F in $(cat .openapi-generator/files) ; do
 done
 
 # Generate library
-docker run --rm --env JAVA_OPTS=-DmaxYamlCodePoints=9999999 -v "${PWD}:/local" openapitools/openapi-generator-cli:v7.11.0 \
+docker run --user=$(id -u):$(id -g) --rm --env JAVA_OPTS=-DmaxYamlCodePoints=9999999 -v "${PWD}:/local:z" openapitools/openapi-generator-cli:v7.26.0 \
     generate \
     --config /local/.openapi-generator/config.yaml \
     --input-spec /local/api/openapi.yaml \
