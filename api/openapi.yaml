@@ -203080,7 +203080,6 @@ components:
       - url
       - display
       - name
-      - description
     DeviceBay:
       type: object
       description: Adds an `owner` field for models which have a ForeignKey to users.Owner.

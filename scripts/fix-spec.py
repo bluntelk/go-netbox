@@ -100,7 +100,7 @@ data['components']['schemas']['Device']['required'] = [
     'url',
     'display',
     'name',
-    'description',
+#     'description',
 ]
 
 # Save the spec file
